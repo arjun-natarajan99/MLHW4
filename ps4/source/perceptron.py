@@ -1,7 +1,7 @@
 """
-Author      : Yi-Chieh Wu
+Author      : Arjun Natarjan, Daniel Sealand
 Class       : HMC CS 158
-Date        : 2020 Feb 11
+Date        : 18 Feb 2020
 Description : Perceptron
 """
 
@@ -164,29 +164,39 @@ class Perceptron :
         # do NOT shuffle examples on each iteration
         # on a mistake, be sure to update self.mistakes_
         # professor's solution: 10 lines
-        
-        # indent the following debugging code to execute every time you update
-        # you can include code both before and after this block
-        mistakes = int(sum(self.mistakes_))
-        if verbose :
-            print(f'\ttheta^{{({mistakes:d})}} = {self.coef_}')
-        if plot :
-            plot_perceptron(data, self, plot_data=False, axes_equal=True,
-                            colors=colors[cndx],
-                            label=rf"$\theta^{{({mistakes:d})}}$")
-            
-            # set next color
-            cndx += 1
-            if cndx == len(colors) :
-                cndx = 0
-            
-            # pause
-            plt.draw()
-            keypress = plt.waitforbuttonpress(0) # True if key, False if mouse
-            if not keypress :
-                plot = False
-        
-        ### ========== TODO : END ========== ###
+
+        incorrectlyClassified = True
+        while incorrectlyClassified:
+            oneIncorrect = False
+            for i in range(n):
+                if y[i] * np.dot(self.coef_, X[i]) <= 0:
+                    self.coef_ = self.coef_ + y[i] * X[i]
+                    oneIncorrect = True
+                    self.mistakes_[i] += 1
+
+                    # indent the following debugging code to execute every time you update
+                    # you can include code both before and after this block
+                    mistakes = int(sum(self.mistakes_))
+                    if verbose :
+                        print(f'\ttheta^{{({mistakes:d})}} = {self.coef_}')
+                    if plot :
+                        plot_perceptron(data, self, plot_data=False, axes_equal=True,
+                                        colors=colors[cndx],
+                                        label=rf"$\theta^{{({mistakes:d})}}$")
+                        
+                        # set next color
+                        cndx += 1
+                        if cndx == len(colors) :
+                            cndx = 0
+                        
+                        # pause
+                        plt.draw()
+                        keypress = plt.waitforbuttonpress(0) # True if key, False if mouse
+                        if not keypress :
+                            plot = False
+                                
+            if not oneIncorrect:
+                incorrectlyClassified = False
         
         return self
     
@@ -230,6 +240,11 @@ def main() :
     ### ========== TODO : START ========== ###
     # part b: compare different initializations
     # professor's solution: 4 lines
+
+    clf.fit(train_data.X, train_data.y, coef_init=np.array([0,0]), verbose=True, plot=True)
+    print(f'train_data, init [0,0]\n\tcoef = {clf.coef_}, mistakes = {int(sum(clf.mistakes_)):d}')
+    clf.fit(train_data.X, train_data.y, coef_init=np.array([1,0]), verbose=True, plot=True)
+    print(f'train_data, init [1,0]\n\tcoef = {clf.coef_}, mistakes = {int(sum(clf.mistakes_)):d}')
     
     
     
@@ -247,10 +262,15 @@ def main() :
     # part c: compare perceptron bound to number of mistakes
     # professor's solution: 4 lines
     
+    n,d = np.shape(train_data.X)
     # compute R^2
+    maxR = 0
+    for i in range(n):
+        maxR = max(np.linalg.norm(train_data.X[i]), maxR)
     
     # compute perceptron bound (R / gamma)^2
-    
+    bound = (maxR / gamma)**2
+    print(bound)
     ### ========== TODO : EEND ========== ###
 
 if __name__ == "__main__" :
