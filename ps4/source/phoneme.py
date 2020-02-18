@@ -1,7 +1,7 @@
 """
-Author      : Yi-Chieh Wu
+Author      : Arjun Natarajan, Daniel Sealand
 Class       : HMC CS 158
-Date        : 2020 Feb 11
+Date        : 18 February 2020
 Description : Perceptron vs Logistic Regression on a Phoneme Dataset
 """
 
@@ -59,8 +59,8 @@ def get_classifier(clf_str) :
         #   find the parameter for tuning regularization strength
         #   let search values be [1e-5, 1e-4, ..., 1e5] (hint: use np.logspace)
         
-        clf = Perceptron()
-        param_grid = {}
+        clf = Perceptron(penalty='l2', max_iter=10000)
+        param_grid = {'C': np.logspace(1e-5,1e5,num=11)}
         ### ========== END : START ========== ###
     elif clf_str == "logistic regression" :
         ### ========== TODO : START ========== ###
@@ -71,8 +71,8 @@ def get_classifier(clf_str) :
         #    find the parameter for tuning regularization strength
         #    let search values be [1e-5, 1e-4, ..., 1e5] (hint: use np.logspace)
         
-        clf = LogisticRegression()
-        param_grid = {}
+        clf = LogisticRegression(penalty='l2', max_iter=10000, solver='lbfgs')
+        param_grid = {'C': np.logspace(1e-5,1e5,num=11)}
         ### ========== END : START ========== ###
     
     return clf, param_grid
@@ -108,6 +108,10 @@ def get_performance(clf, param_grid, X, y, ntrials=100) :
     # hint: use StratifiedKFold, GridSearchCV, and cross_validate
     #       set idd=False for GridSearchCV to prevent DeprecationWarnings
     # professor's solution: 6 lines
+
+    for i in range(5):
+        inner = kFold = StratifiedKFold(n_splits=2)
+
     
     
     
@@ -169,6 +173,9 @@ def main() :
     # hints: be sure to set parameters for Perceptron
     #        an easy parameter to miss is tol=None, a much stricter stopping criterion than default
     # professor's solution: 5 lines
+    clf = Perceptron(tol=None, penalty='l2')
+    clf.fit(X, y)
+    print(clf.score(X, y))
     
     
     
