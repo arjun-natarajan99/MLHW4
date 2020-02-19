@@ -158,15 +158,16 @@ class Perceptron :
             if not keypress :
                 plot = False
         
-        ### ========== TODO : START ========== ###
         # part a: implement perceptron algorithm
         # cycle until all examples are correctly classified
         # do NOT shuffle examples on each iteration
         # on a mistake, be sure to update self.mistakes_
         # professor's solution: 10 lines
 
+        # update weights
         incorrectlyClassified = True
         while incorrectlyClassified:
+            # checks if an example is classified incorrectly and if so, updates the weights
             oneIncorrect = False
             for i in range(n):
                 if y[i] * np.dot(self.coef_, X[i]) <= 0:
@@ -194,7 +195,8 @@ class Perceptron :
                         keypress = plt.waitforbuttonpress(0) # True if key, False if mouse
                         if not keypress :
                             plot = False
-                                
+
+            # if all examples classified correctly, stop                    
             if not oneIncorrect:
                 incorrectlyClassified = False
         
@@ -237,7 +239,6 @@ def main() :
     
     train_data = util.load_data("perceptron_data.csv")
     
-    ### ========== TODO : START ========== ###
     # part b: compare different initializations
     # professor's solution: 4 lines
 
@@ -245,11 +246,10 @@ def main() :
     print(f'train_data, init [0,0]\n\tcoef = {clf.coef_}, mistakes = {int(sum(clf.mistakes_)):d}')
     clf.fit(train_data.X, train_data.y, coef_init=np.array([1,0]), verbose=True, plot=True)
     print(f'train_data, init [1,0]\n\tcoef = {clf.coef_}, mistakes = {int(sum(clf.mistakes_)):d}')
-    
-    
-    
-    ### ========== TODO : END ========== ###
-    
+        
+
+
+
     print('perceptron bound')
     
     # you do not have to understand this code -- we will cover it when we discuss SVMs
@@ -258,7 +258,6 @@ def main() :
     clf.fit(train_data.X, train_data.y)
     gamma = 1./np.linalg.norm(clf.coef_, 2)
     
-    ### ========== TODO : START ========== ###
     # part c: compare perceptron bound to number of mistakes
     # professor's solution: 4 lines
     
@@ -271,7 +270,6 @@ def main() :
     # compute perceptron bound (R / gamma)^2
     bound = (maxR / gamma)**2
     print(bound)
-    ### ========== TODO : EEND ========== ###
 
 if __name__ == "__main__" :
     main()

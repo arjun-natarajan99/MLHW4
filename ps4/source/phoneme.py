@@ -51,7 +51,6 @@ def get_classifier(clf_str) :
         clf = DummyClassifier(strategy='stratified')
         param_grid = {}
     elif clf_str == "perceptron" :
-        ### ========== TODO : START ========== ###
         # part b: modify two lines below to set parameters for perceptron
         # classifier parameters
         #   estimate intercept, use L2-regularization, set max iterations of 10k
@@ -60,10 +59,8 @@ def get_classifier(clf_str) :
         #   let search values be [1e-5, 1e-4, ..., 1e5] (hint: use np.logspace)
         
         clf = Perceptron(penalty='l2', max_iter=10000)
-        param_grid = {'C': np.logspace(1e-5,1e5,num=11)}
-        ### ========== END : START ========== ###
+        param_grid = {'alpha': np.logspace(-5,5,num=11)}
     elif clf_str == "logistic regression" :
-        ### ========== TODO : START ========== ###
         # part b: modify two lines below to set parameters for logistic regression
         # classifier parameters
         #     estimate intercept, use L2-regularization and lbfgs solver, set max iterations of 10k
@@ -72,8 +69,7 @@ def get_classifier(clf_str) :
         #    let search values be [1e-5, 1e-4, ..., 1e5] (hint: use np.logspace)
         
         clf = LogisticRegression(penalty='l2', max_iter=10000, solver='lbfgs')
-        param_grid = {'C': np.logspace(1e-5,1e5,num=11)}
-        ### ========== END : START ========== ###
+        param_grid = {'C': np.logspace(-5,5,num=11)}
     
     return clf, param_grid
 
@@ -103,20 +99,27 @@ def get_performance(clf, param_grid, X, y, ntrials=100) :
     train_scores = np.zeros(ntrials)
     test_scores = np.zeros(ntrials)
     
-    ### ========== TODO : START ========== ###
     # part c: compute average performance using 5x2 cross-validation
     # hint: use StratifiedKFold, GridSearchCV, and cross_validate
     #       set idd=False for GridSearchCV to prevent DeprecationWarnings
     # professor's solution: 6 lines
 
-    for i in range(5):
-        inner = kFold = StratifiedKFold(n_splits=2)
+    for i in range(ntrials):
 
-    
-    
-    
-    ### ========== TODO : END ========== ###
-    
+        # Choose cross-validation techniques for the inner and outer loops,
+        # independently of the dataset.
+        # E.g "GroupKFold", "LeaveOneOut", "LeaveOneGroupOut", etc.
+        inner_cv = StratifiedKFold(n_splits=2, shuffle=True, random_state=i)
+        outer_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
+
+        # Non_nested parameter search and scoring
+        newClf = GridSearchCV(estimator=clf, param_grid=param_grid, cv=inner_cv)
+
+        # Nested CV with parameter optimization
+        nested_score = cross_validate(newClf, X, y, cv=outer_cv, return_train_score=True)
+        train_scores[i] = np.mean(nested_score['train_score'])
+        test_scores[i] = np.mean(nested_score['test_score'])
+        
     return train_scores, test_scores
 
 
@@ -168,19 +171,15 @@ def main() :
     phoneme = util.load_data("phoneme_train.csv")
     X, y = phoneme.X, phoneme.y
     
-    ### ========== TODO : START ========== ###
     # part a: is data linearly separable?
     # hints: be sure to set parameters for Perceptron
     #        an easy parameter to miss is tol=None, a much stricter stopping criterion than default
     # professor's solution: 5 lines
-    clf = Perceptron(tol=None, penalty='l2')
+    clf = Perceptron(tol=None)
     clf.fit(X, y)
     print(clf.score(X, y))
     
-    
-    
-    ### ========== TODO : END ========== ###
-    
+        
     print()
     
     #========================================
@@ -207,15 +206,19 @@ def main() :
     # plot
     plot(train_scores_all, test_scores_all, clf_strs)
     
-    ### ========== TODO : START ========== ###
     # part e: compute significance using t-test
     # professor's solution: 7 lines
     
+    # perform pairwise comparisons between each classifiers
     print("significance tests")
-    
-    
-    
-    ### ========== TODO : END ========== ###
+    ttestScore, pValue = stats.ttest_rel(test_scores_all['dummy'], test_scores_all['perceptron'])
+    print(pValue)
+    ttestScore, pValue = stats.ttest_rel(test_scores_all['dummy'], test_scores_all['logistic regression'])
+    print(pValue)
+    ttestScore, pValue = stats.ttest_rel(test_scores_all['perceptron'], test_scores_all['logistic regression'])
+    print(pValue)
+
+
 
 if __name__ == "__main__" :
     main()
